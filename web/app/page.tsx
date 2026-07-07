@@ -7,6 +7,9 @@ import { Pagination } from "@/components/Pagination";
 import { CalendarView } from "@/components/CalendarView";
 import type { FilterStatus } from "@/lib/types";
 
+// 이벤트 목록은 수집 배치가 수시로 갱신하므로 fetch 캐시에 갇히지 않도록 정적 프리렌더를 끈다.
+export const dynamic = "force-dynamic";
+
 const DOMAINS = [
   { code: "CULTURE", label: "문화" },
   { code: "IND", label: "산업" },
