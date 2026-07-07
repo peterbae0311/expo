@@ -1,7 +1,8 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { getEventById } from "@/lib/data";
-import { computeStatus, statusLabel, displayVenue, displayRegion, decodeEntities, toMultiline } from "@/lib/types";
+import { computeStatus, statusLabel, displayVenue, displayRegion, displayDateRange, decodeEntities, toMultiline } from "@/lib/types";
+import { EventImage } from "@/components/EventImage";
 
 export default async function EventDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
@@ -26,12 +27,12 @@ export default async function EventDetailPage({ params }: { params: Promise<{ id
 
       <div className="grid grid-cols-1 gap-10 md:grid-cols-[340px_1fr]">
         <div className="aspect-[3/4] w-full bg-line/30">
-          {event.image_url ? (
-            // eslint-disable-next-line @next/next/no-img-element
-            <img src={event.image_url} alt="" className="h-full w-full object-contain" />
-          ) : (
-            <div className="h-full w-full bg-gradient-to-br from-culture/30 to-line" />
-          )}
+          <EventImage
+            src={event.image_url}
+            alt=""
+            imgClassName="h-full w-full object-contain"
+            fallbackClassName="h-full w-full bg-gradient-to-br from-culture/30 to-line"
+          />
         </div>
 
         <div>
@@ -47,7 +48,7 @@ export default async function EventDetailPage({ params }: { params: Promise<{ id
           </h1>
 
           <dl className="border-t border-ink/50 text-sm">
-            <Row k="기간" v={`${event.start_date}${event.end_date ? ` – ${event.end_date}` : ""}`} />
+            <Row k="기간" v={displayDateRange(event)} />
             {event.event_time ? <Row k="시간" v={toMultiline(event.event_time)} pre /> : null}
             <Row k="장소" v={decodeEntities(displayVenue(event))} />
             {region ? <Row k="지역" v={region} /> : null}
