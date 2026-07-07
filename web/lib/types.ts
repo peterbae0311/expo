@@ -79,6 +79,10 @@ export function computeStatus(startDate: string, endDate: string | null): EventS
   return "ongoing";
 }
 
+export function displayDateRange(row: EventRow): string {
+  return row.end_date && row.end_date !== row.start_date ? `${row.start_date} – ${row.end_date}` : row.start_date;
+}
+
 export function displayVenue(row: EventRow): string {
   return row.exh_venues?.name ?? row.region_sido ?? "장소 미정";
 }
