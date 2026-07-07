@@ -18,11 +18,12 @@ export default async function EventDetailPage({ params }: { params: Promise<{ id
   const categoryLabel = event.exh_categories?.name ?? "기타";
   const region = displayRegion(event);
   const hasCoords = false; // 좌표 필드는 exh_venues에 있으나 목록 select에는 포함하지 않음
+  const listHref = isIndustry ? "/?domain=IND" : "/?domain=CULTURE";
 
   return (
     <div className="content-shell py-10">
       <div className="mb-6 text-xs font-bold uppercase tracking-wide text-ink-muted">
-        <Link href="/" className="underline-grow hover:text-ink">
+        <Link href={listHref} className="underline-grow hover:text-ink">
           목록
         </Link>{" "}
         / {categoryLabel}
@@ -73,7 +74,7 @@ export default async function EventDetailPage({ params }: { params: Promise<{ id
                 원문에서 보기 ↗
               </a>
             ) : null}
-            <Link href="/" className="border border-line-strong px-6 py-3 text-center text-sm font-bold text-ink-muted hover:border-ink/60 hover:text-ink">
+            <Link href={listHref} className="border border-line-strong px-6 py-3 text-center text-sm font-bold text-ink-muted hover:border-ink/60 hover:text-ink">
               ← 목록으로
             </Link>
           </div>
