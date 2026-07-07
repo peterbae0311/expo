@@ -4,6 +4,9 @@ import { getEventById } from "@/lib/data";
 import { computeStatus, statusLabel, displayVenue, displayRegion, displayDateRange, decodeEntities, toMultiline } from "@/lib/types";
 import { EventImage } from "@/components/EventImage";
 
+// 이벤트 데이터가 수시로 갱신되므로 fetch 캐시에 갇히지 않도록 정적 프리렌더를 끈다.
+export const dynamic = "force-dynamic";
+
 export default async function EventDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
   const event = await getEventById(id);
