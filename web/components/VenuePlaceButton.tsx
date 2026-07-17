@@ -37,7 +37,7 @@ export function VenuePlaceButton({ venueName, className }: { venueName: string; 
   const [open, setOpen] = useState(false);
 
   if (!venueName || venueName === "장소 미정" || !process.env.NEXT_PUBLIC_KAKAO_JS_KEY) {
-    return <span className={className}>{venueName}</span>;
+    return <span className={`${className ?? ""} block truncate`}>{venueName}</span>;
   }
 
   return (
@@ -49,12 +49,23 @@ export function VenuePlaceButton({ venueName, className }: { venueName: string; 
           e.stopPropagation();
           setOpen(true);
         }}
-        className={`${className ?? ""} text-left hover:underline`}
+        className={`${className ?? ""} inline-flex max-w-full items-center gap-1 text-left hover:underline`}
       >
-        {venueName}
+        <PinIcon className="h-3 w-3 shrink-0 text-culture" />
+        <span className="truncate">{venueName}</span>
       </button>
       {open ? <VenueMapModal venueName={venueName} onClose={() => setOpen(false)} /> : null}
     </>
+  );
+}
+
+/** 장소 텍스트가 지도 팝업을 열는 기능임을 호버 없이도 바로 알 수 있게 하는 위치 아이콘 */
+function PinIcon({ className }: { className?: string }) {
+  return (
+    <svg viewBox="0 0 24 24" className={className} fill="none" xmlns="http://www.w3.org/2000/svg">
+      <path d="M12 21s7-6.1 7-11.5A7 7 0 0 0 5 9.5C5 14.9 12 21 12 21z" stroke="currentColor" strokeWidth="1.8" strokeLinejoin="round" />
+      <circle cx="12" cy="9.5" r="2.3" stroke="currentColor" strokeWidth="1.8" />
+    </svg>
   );
 }
 
@@ -116,7 +127,7 @@ function VenueMapModal({ venueName, onClose }: { venueName: string; onClose: () 
 
   return createPortal(
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-ink/60 p-4" onClick={onClose}>
-      <div className="flex h-[700px] w-full max-w-[800px] flex-col bg-paper p-5" onClick={(e) => e.stopPropagation()}>
+      <div className="flex h-[700px] w-full max-w-[1100px] flex-col bg-paper p-5" onClick={(e) => e.stopPropagation()}>
         <div className="mb-3 flex shrink-0 items-start justify-between gap-4">
           <h3 className="text-base font-black leading-snug">{venueName}</h3>
           <button type="button" onClick={onClose} aria-label="닫기" className="shrink-0 text-ink-muted hover:text-ink">

@@ -38,7 +38,7 @@ export function EventCard({ event }: { event: EventRow }) {
         <div className="mt-1 text-[11px] font-bold tabular-nums text-ink-muted">{displayDateRange(event)}</div>
         <VenuePlaceButton
           venueName={decodeEntities(displayVenue(event))}
-          className="mt-0.5 block truncate text-[12px] text-ink-muted"
+          className="mt-0.5 w-full text-[12px] text-ink-muted"
         />
       </div>
     </Link>
