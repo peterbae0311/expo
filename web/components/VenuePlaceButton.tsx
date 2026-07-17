@@ -116,28 +116,29 @@ function VenueMapModal({ venueName, onClose }: { venueName: string; onClose: () 
 
   return createPortal(
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-ink/60 p-4" onClick={onClose}>
-      <div className="w-full max-w-md bg-paper p-5" onClick={(e) => e.stopPropagation()}>
-        <div className="mb-3 flex items-start justify-between gap-4">
+      <div className="flex h-[700px] w-full max-w-[800px] flex-col bg-paper p-5" onClick={(e) => e.stopPropagation()}>
+        <div className="mb-3 flex shrink-0 items-start justify-between gap-4">
           <h3 className="text-base font-black leading-snug">{venueName}</h3>
           <button type="button" onClick={onClose} aria-label="닫기" className="shrink-0 text-ink-muted hover:text-ink">
             ✕
           </button>
         </div>
 
-        {status === "loading" ? (
-          <div className="flex h-48 items-center justify-center text-xs text-ink-muted">위치 검색 중...</div>
-        ) : status === "found" && place ? (
-          <>
-            <div ref={mapContainerRef} className="h-48 w-full border border-line" />
-            <div className="mt-2 text-xs text-ink-muted">{place.address}</div>
-          </>
-        ) : (
-          <div className="flex h-24 items-center justify-center text-center text-xs text-ink-muted">
-            {status === "error" ? "지도를 불러오지 못했습니다." : "정확한 위치를 찾을 수 없습니다. 카카오맵에서 직접 검색해보세요."}
-          </div>
-        )}
+        <div className="min-h-0 flex-1">
+          {status === "loading" ? (
+            <div className="flex h-full items-center justify-center text-xs text-ink-muted">위치 검색 중...</div>
+          ) : status === "found" && place ? (
+            <div ref={mapContainerRef} className="h-full w-full border border-line" />
+          ) : (
+            <div className="flex h-full items-center justify-center text-center text-xs text-ink-muted">
+              {status === "error" ? "지도를 불러오지 못했습니다." : "정확한 위치를 찾을 수 없습니다. 카카오맵에서 직접 검색해보세요."}
+            </div>
+          )}
+        </div>
 
-        <div className="mt-4 flex gap-2">
+        {status === "found" && place ? <div className="mt-2 shrink-0 text-xs text-ink-muted">{place.address}</div> : null}
+
+        <div className="mt-4 flex shrink-0 gap-2">
           <a
             href={directionsHref}
             target="_blank"
