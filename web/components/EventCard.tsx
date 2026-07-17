@@ -1,6 +1,6 @@
 import Link from "next/link";
 import type { EventRow } from "@/lib/types";
-import { computeStatus, statusLabel, displayVenue, displayDateRange, decodeEntities } from "@/lib/types";
+import { computeStatus, statusLabel, displayVenue, displayDateRange, decodeEntities, isOverseasEvent } from "@/lib/types";
 import { EventImage } from "@/components/EventImage";
 import { VenuePlaceButton } from "@/components/VenuePlaceButton";
 
@@ -38,6 +38,7 @@ export function EventCard({ event }: { event: EventRow }) {
         <div className="mt-1 text-[11px] font-bold tabular-nums text-ink-muted">{displayDateRange(event)}</div>
         <VenuePlaceButton
           venueName={decodeEntities(displayVenue(event))}
+          isOverseas={isOverseasEvent(event)}
           className="mt-0.5 w-full text-[12px] text-ink-muted"
         />
       </div>

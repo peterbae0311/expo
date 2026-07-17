@@ -10,7 +10,7 @@ async function getSourceByCode(code: string): Promise<SourceRow> {
   return data as SourceRow;
 }
 
-/** KOPIS 등 'YYYY.MM.DD' 형식 날짜를 Postgres date 컬럼용 'YYYY-MM-DD'로 정규화 */
+/** KOPIS 등 'YYYY.MM.DD' 형식 날짜를 Postgres date 컴럼용 'YYYY-MM-DD'로 정규화 */
 function toIsoDate(raw: string): string {
   return raw.trim().replaceAll('.', '-');
 }
@@ -117,6 +117,7 @@ export async function syncSource(code: string): Promise<SyncResult> {
             end_date: normalized.endDate ? toIsoDate(normalized.endDate) : null,
             event_time: normalized.eventTime ?? null,
             venue_id: venueId,
+            is_overseas: adapter.isOverseas ?? false,
             price_info: normalized.priceInfo ?? null,
             image_url: normalized.imageUrl ?? null,
             source_url: normalized.sourceUrl ?? null,

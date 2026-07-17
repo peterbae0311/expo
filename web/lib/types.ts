@@ -13,13 +13,13 @@ const HTML_ENTITIES: Record<string, string> = {
 
 /**
  * 일부 소스(문화공공데이터광장 등)는 원본 XML 자체가 이중 이스케이프되어 있어
- * 파서가 한 번 디코딩해도 "&lt;제목&gt;" 같은 literal 엔티티가 남는다. 표시 직전에 한 번 더 푼다.
+ * 파서가 한 번 디코딩해도 "&lt;제목&gt;" 같은 literal 엔티티가 남는다. 표시 직전에 한 번 더 푸다.
  */
 export function decodeEntities(value: string): string {
   return value.replace(/&(lt|gt|amp|quot|#39|apos|nbsp);/g, (m) => HTML_ENTITIES[m] ?? m);
 }
 
-/** 원본 텍스트에 <br> 태그가 그대로 들어있는 경우(예: EVENT_PERIOD) 줄바꿈 문자로 바꾼다. white-space:pre-line과 함께 쓴다. */
+/** 원본 텍스트에 <br> 태그가 그대로 들어있는 경우(예: EVENT_PERIOD) 줄바꿈 문자로 바꿔다. white-space:pre-line과 함께 쓴다. */
 export function toMultiline(value: string): string {
   return decodeEntities(value).replace(/<br\s*\/?>/gi, "\n");
 }
@@ -56,8 +56,15 @@ export interface EventRow {
   price_info: string | null;
   image_url: string | null;
   source_url: string | null;
+  /** 수집 어댑터가 exh_events에 직접 기록 — exh_sources는 anon 키로 조인 불가(RLS)라 여기 채워둘다 */
+  is_overseas: boolean;
   exh_venues: VenueRef | null;
   exh_categories: CategoryRef | null;
+}
+
+/** 카카오맵은 국내만 지원하므로, 해외 이벤트는 구글맵으로 분기한다 */
+export function isOverseasEvent(row: EventRow): boolean {
+  return row.is_overseas;
 }
 
 const STATUS_LABEL: Record<EventStatus, string> = {

@@ -2,7 +2,7 @@ import Link from "next/link";
 import type { ReactNode } from "react";
 import { notFound } from "next/navigation";
 import { getEventById } from "@/lib/data";
-import { computeStatus, statusLabel, displayVenue, displayRegion, displayDateRange, decodeEntities, toMultiline } from "@/lib/types";
+import { computeStatus, statusLabel, displayVenue, displayRegion, displayDateRange, decodeEntities, toMultiline, isOverseasEvent } from "@/lib/types";
 import { EventImage } from "@/components/EventImage";
 import { VenuePlaceButton } from "@/components/VenuePlaceButton";
 
@@ -55,7 +55,16 @@ export default async function EventDetailPage({ params }: { params: Promise<{ id
           <dl className="border-t border-ink/50 text-sm">
             <Row k="기간" v={displayDateRange(event)} />
             {event.event_time ? <Row k="시간" v={toMultiline(event.event_time)} pre /> : null}
-            <Row k="장소" v={<VenuePlaceButton venueName={decodeEntities(displayVenue(event))} className="hover:underline" />} />
+            <Row
+              k="장소"
+              v={
+                <VenuePlaceButton
+                  venueName={decodeEntities(displayVenue(event))}
+                  isOverseas={isOverseasEvent(event)}
+                  className="hover:underline"
+                />
+              }
+            />
             {region ? <Row k="지역" v={region} /> : null}
             {event.price_info ? <Row k="요금" v={decodeEntities(event.price_info)} /> : null}
           </dl>

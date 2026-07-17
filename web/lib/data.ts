@@ -3,7 +3,7 @@ import { supabaseAdmin } from "./supabase-admin";
 import type { CategoryRow, EventRow, FilterStatus } from "./types";
 
 const EVENT_SELECT =
-  "id,title,category_code,region_sido,region_sigungu,start_date,end_date,event_time,price_info,image_url,source_url,exh_venues(name,region_sido,region_sigungu),exh_categories(code,name,parent_code)";
+  "id,title,category_code,region_sido,region_sigungu,start_date,end_date,event_time,price_info,image_url,source_url,is_overseas,exh_venues(name,region_sido,region_sigungu),exh_categories(code,name,parent_code)";
 
 export async function getCategories(): Promise<CategoryRow[]> {
   const { data, error } = await supabase
@@ -63,7 +63,7 @@ export async function getEvents(filters: EventFilters): Promise<EventsResult> {
     query = query.ilike("title", `%${filters.q}%`);
   }
   if (filters.from) {
-    // end_date가 없으면 start_date를 종료일로 간주한다 (computeStatus와 동일 규칙)
+    // end_date가 없으면 start_date를 종료일로 간주한다 (computeStatus와 동일한 규칙)
     query = query.or(`end_date.gte.${filters.from},and(end_date.is.null,start_date.gte.${filters.from})`);
   }
   if (filters.to) {

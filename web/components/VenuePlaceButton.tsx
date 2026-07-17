@@ -33,11 +33,41 @@ function loadKakaoMapsSdk(): Promise<void> {
  * EventCard 안에서는 카드 전체가 상세 페이지로 가는 Link이므로,
  * 클릭 이벤트가 그 Link로 버블링/기본 네비게이션되지 않도록 막는다.
  */
-export function VenuePlaceButton({ venueName, className }: { venueName: string; className?: string }) {
+export function VenuePlaceButton({
+  venueName,
+  className,
+  isOverseas = false,
+}: {
+  venueName: string;
+  className?: string;
+  /** 카카오맵은 국내 장소만 검색되므로, 해외 이벤트는 구글맵 링크로 분기한다 */
+  isOverseas?: boolean;
+}) {
   const [open, setOpen] = useState(false);
 
-  if (!venueName || venueName === "장소 미정" || !process.env.NEXT_PUBLIC_KAKAO_JS_KEY) {
+  if (!venueName || venueName === "장소 미정" || (!isOverseas && !process.env.NEXT_PUBLIC_KAKAO_JS_KEY)) {
     return <span className={`${className ?? ""} block truncate`}>{venueName}</span>;
+  }
+
+  if (isOverseas) {
+    const mapHref = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(venueName)}`;
+    return (
+      // EventCard 안에서는 카드 전체가 <Link>(=<a>)이므로, 여기서 <a>를 쓰면
+      // <a> 안에 <a>가 중첩되는 잘못된 HTML이 되어 하이드레이션 에러가 난다.
+      // button + window.open으로 새 탭을 띄우여 같은 동작을 안전하게 구현한다.
+      <button
+        type="button"
+        onClick={(e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          window.open(mapHref, "_blank", "noopener,noreferrer");
+        }}
+        className={`${className ?? ""} inline-flex max-w-full items-center gap-1 text-left hover:underline`}
+      >
+        <PinIcon className="h-3 w-3 shrink-0 text-culture" />
+        <span className="truncate">{venueName}</span>
+      </button>
+    );
   }
 
   return (

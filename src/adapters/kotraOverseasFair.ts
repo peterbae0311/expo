@@ -4,8 +4,8 @@ import type { SourceAdapter } from './types.js';
 
 // data.go.kr(odcloud) 파일데이터 API. Swagger: https://infuser.odcloud.kr/oas/docs?namespace=15135584/v1
 // exh_sources.base_url에는 최신 uddi 엔드포인트(2026-07-08 기준 "_20250912"본)가 저장돼 있다.
-// GEP(글로벌전시포탈) 등록 기준 2020~2026년 "개최 예정" 해외전시회 데이터(17,241건, 실제 응답으로 확인).
-// 이전 데이터셋(namespace 15003367, "해외전시회 정보")은 연도 없는 'MM-DD~MM-DD' 기간만 제공하는
+// GEP(글로벌전시포털) 등록 기준 2020~2026년 "개최 예정" 해외전시회 데이터(17,241건, 실제 응답으로 확인).
+// 이전 데이터셋(namespace 15003367, "해외전시회 정보")는 연도 없는 'MM-DD~MM-DD' 기간만 제공하는
 // 과거 스냅샷이라 제외했으나, 이 데이터셋은 개최시작예정일자/개최종료예정일자가 완전한 날짜(YYYY-MM-DD)로
 // 내려오고 실제로 미래 일정(예정 534건, 진행중 42건, 2026-07-08 기준)이 포함되어 있어 채택함.
 // 응답 필드: 해외전시회명, 개최예정연도, 개최시작예정일자, 개최종료예정일자, 개최국가명, 개최도시명,
@@ -45,6 +45,7 @@ interface KotraFairItem {
 export const kotraOverseasFairAdapter: SourceAdapter = {
   code: 'kotra_overseas_fair',
   defaultCategoryCode: 'IND_OVERSEAS',
+  isOverseas: true,
 
   async fetchRaw(source: SourceRow): Promise<RawFetchItem[]> {
     if (!source.base_url) {
