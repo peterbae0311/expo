@@ -1,5 +1,6 @@
 import { XMLParser } from 'fast-xml-parser';
 import { getSourceServiceKey } from '../lib/env.js';
+import { fetchWithRetry } from '../lib/http.js';
 import type { RawFetchItem, NormalizedEvent, SourceRow } from '../lib/types.js';
 import type { SourceAdapter } from './types.js';
 
@@ -66,7 +67,7 @@ export const cultureDataPlazaExpoAdapter: SourceAdapter = {
       url.searchParams.set('numOfRows', String(PAGE_SIZE));
       url.searchParams.set('pageNo', String(pageNo));
 
-      const res = await fetch(url.toString());
+      const res = await fetchWithRetry(url.toString());
       if (!res.ok) {
         throw new Error(`culture_data_plaza_expo: 목록 조회 실패 (HTTP ${res.status}, page=${pageNo})`);
       }
