@@ -59,7 +59,7 @@ export function VenuePlaceButton({ venueName, className }: { venueName: string; 
   );
 }
 
-/** 장소 텍스트가 지도 팝업을 열는 기능임을 호버 없이도 바로 알 수 있게 하는 위치 아이콘 */
+/** 장소 텍스트가 지도 팝업을 여는 기능임을 호버 없이도 바로 알 수 있게 하는 위치 아이콘 */
 function PinIcon({ className }: { className?: string }) {
   return (
     <svg viewBox="0 0 24 24" className={className} fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -70,6 +70,48 @@ function PinIcon({ className }: { className?: string }) {
 }
 
 type SearchStatus = "loading" | "found" | "not-found" | "error";
+type KakaoPlace = { x: string; y: string; road_address_name: string; address_name: string };
+
+/**
+ * "서울기록원 2층 제3전시실"처럼 장소명에 층/호실/부속공간명이 붙어 있으면
+ * 카카오 장소 검색에 그대로 걸리지 않는 경우가 많다. 괄호 안 상세주소를 먼저 떼고,
+ * 그다음 뒤쪽 단어(가장 상세한 부분)부터 하나씩 잘라내며 검색을 재시도할 후보 목록을 만든다.
+ * 예) "여의도 63빌딩 1F 동편 로비" -> ["여의도 63빌딩 1F 동편 로비", "여의도 63빌딩 1F 동편", "여의도 63빌딩 1F", "여의도 63빌딩", "여의도"]
+ */
+function buildSearchCandidates(venueName: string): string[] {
+  const candidates: string[] = [];
+  const seen = new Set<string>();
+  const add = (value: string) => {
+    const trimmed = value.trim();
+    if (trimmed && !seen.has(trimmed)) {
+      seen.add(trimmed);
+      candidates.push(trimmed);
+    }
+  };
+
+  add(venueName);
+  const withoutParens = venueName.replace(/\([^)]*\)/g, " ").trim();
+  add(withoutParens);
+
+  const tokens = withoutParens.split(/\s+/).filter(Boolean);
+  for (let end = tokens.length - 1; end >= 1; end -= 1) {
+    add(tokens.slice(0, end).join(" "));
+  }
+
+  return candidates;
+}
+
+function searchKakaoPlace(places: any, query: string): Promise<KakaoPlace | null> {
+  return new Promise((resolve) => {
+    places.keywordSearch(query, (data: KakaoPlace[], resultStatus: string) => {
+      if (resultStatus === window.kakao.maps.services.Status.OK && data.length > 0) {
+        resolve(data[0]);
+      } else {
+        resolve(null);
+      }
+    });
+  });
+}
 
 function VenueMapModal({ venueName, onClose }: { venueName: string; onClose: () => void }) {
   const mapContainerRef = useRef<HTMLDivElement>(null);
@@ -79,23 +121,25 @@ function VenueMapModal({ venueName, onClose }: { venueName: string; onClose: () 
   useEffect(() => {
     let cancelled = false;
     loadKakaoMapsSdk()
-      .then(() => {
+      .then(async () => {
         if (cancelled) return;
         const places = new window.kakao.maps.services.Places();
-        places.keywordSearch(venueName, (data: Array<{ x: string; y: string; road_address_name: string; address_name: string }>, resultStatus: string) => {
+        for (const candidate of buildSearchCandidates(venueName)) {
           if (cancelled) return;
-          if (resultStatus === window.kakao.maps.services.Status.OK && data.length > 0) {
-            const first = data[0];
-            setPlace({
-              lat: parseFloat(first.y),
-              lng: parseFloat(first.x),
-              address: first.road_address_name || first.address_name,
-            });
-            setStatus("found");
-          } else {
-            setStatus("not-found");
+          const found = await searchKakaoPlace(places, candidate);
+          if (found) {
+            if (!cancelled) {
+              setPlace({
+                lat: parseFloat(found.y),
+                lng: parseFloat(found.x),
+                address: found.road_address_name || found.address_name,
+              });
+              setStatus("found");
+            }
+            return;
           }
-        });
+        }
+        if (!cancelled) setStatus("not-found");
       })
       .catch(() => {
         if (!cancelled) setStatus("error");
@@ -127,7 +171,7 @@ function VenueMapModal({ venueName, onClose }: { venueName: string; onClose: () 
 
   return createPortal(
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-ink/60 p-4" onClick={onClose}>
-      <div className="flex h-[700px] w-full max-w-[1100px] flex-col bg-paper p-5" onClick={(e) => e.stopPropagation()}>
+      <div className="flex h-[800px] w-full max-w-[1300px] flex-col bg-paper p-5" onClick={(e) => e.stopPropagation()}>
         <div className="mb-3 flex shrink-0 items-start justify-between gap-4">
           <h3 className="text-base font-black leading-snug">{venueName}</h3>
           <button type="button" onClick={onClose} aria-label="닫기" className="shrink-0 text-ink-muted hover:text-ink">
@@ -151,20 +195,20 @@ function VenueMapModal({ venueName, onClose }: { venueName: string; onClose: () 
 
         <div className="mt-4 flex shrink-0 gap-2">
           <a
-            href={directionsHref}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="flex-1 bg-ink px-4 py-2.5 text-center text-xs font-bold text-paper hover:opacity-80"
-          >
-            길찾기 ↗
-          </a>
-          <a
             href={mapHref}
             target="_blank"
             rel="noopener noreferrer"
             className="flex-1 border border-line-strong px-4 py-2.5 text-center text-xs font-bold text-ink-muted hover:text-ink"
           >
             카카오맵에서 보기 ↗
+          </a>
+          <a
+            href={directionsHref}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="flex-1 bg-ink px-4 py-2.5 text-center text-xs font-bold text-paper hover:opacity-80"
+          >
+            길찾기 ↗
           </a>
         </div>
       </div>
