@@ -151,7 +151,7 @@ async function ListBlock({
   page: number;
   current: ParamsInput;
 }) {
-  const pageSize = 18;
+  const pageSize = 20;
   const { rows, total } = await getEvents({ categoryCodes: catCodes, sido, status, q: q || undefined, page, pageSize });
   const totalPages = Math.max(1, Math.ceil(total / pageSize));
 
