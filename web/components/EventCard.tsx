@@ -2,6 +2,7 @@ import Link from "next/link";
 import type { EventRow } from "@/lib/types";
 import { computeStatus, statusLabel, displayVenue, displayDateRange, decodeEntities } from "@/lib/types";
 import { EventImage } from "@/components/EventImage";
+import { VenuePlaceButton } from "@/components/VenuePlaceButton";
 
 export function EventCard({ event }: { event: EventRow }) {
   const status = computeStatus(event.start_date, event.end_date);
@@ -35,7 +36,10 @@ export function EventCard({ event }: { event: EventRow }) {
           {decodeEntities(event.title)}
         </div>
         <div className="mt-1 text-[11px] font-bold tabular-nums text-ink-muted">{displayDateRange(event)}</div>
-        <div className="mt-0.5 truncate text-[12px] text-ink-muted">{decodeEntities(displayVenue(event))}</div>
+        <VenuePlaceButton
+          venueName={decodeEntities(displayVenue(event))}
+          className="mt-0.5 block truncate text-[12px] text-ink-muted"
+        />
       </div>
     </Link>
   );

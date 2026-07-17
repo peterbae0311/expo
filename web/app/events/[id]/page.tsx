@@ -1,10 +1,12 @@
 import Link from "next/link";
+import type { ReactNode } from "react";
 import { notFound } from "next/navigation";
 import { getEventById } from "@/lib/data";
 import { computeStatus, statusLabel, displayVenue, displayRegion, displayDateRange, decodeEntities, toMultiline } from "@/lib/types";
 import { EventImage } from "@/components/EventImage";
+import { VenuePlaceButton } from "@/components/VenuePlaceButton";
 
-// 이벤트 데이터가 수시로 갱신되므로 fetch 캐시에 갇히지 않도록 정적 프리렌더를 끈다.
+// 이벤트 데이터가 수시로 갱신되므로 fetch 캐시에 갇히지 않도록 정적 프리렌더를 끔다.
 export const dynamic = "force-dynamic";
 
 export default async function EventDetailPage({ params }: { params: Promise<{ id: string }> }) {
@@ -17,7 +19,6 @@ export default async function EventDetailPage({ params }: { params: Promise<{ id
   const domainLabel = isIndustry ? "산업" : "문화";
   const categoryLabel = event.exh_categories?.name ?? "기타";
   const region = displayRegion(event);
-  const hasCoords = false; // 좌표 필드는 exh_venues에 있으나 목록 select에는 포함하지 않음
   const listHref = isIndustry ? "/?domain=IND" : "/?domain=CULTURE";
 
   return (
@@ -54,14 +55,10 @@ export default async function EventDetailPage({ params }: { params: Promise<{ id
           <dl className="border-t border-ink/50 text-sm">
             <Row k="기간" v={displayDateRange(event)} />
             {event.event_time ? <Row k="시간" v={toMultiline(event.event_time)} pre /> : null}
-            <Row k="장소" v={decodeEntities(displayVenue(event))} />
+            <Row k="장소" v={<VenuePlaceButton venueName={decodeEntities(displayVenue(event))} className="hover:underline" />} />
             {region ? <Row k="지역" v={region} /> : null}
             {event.price_info ? <Row k="요금" v={decodeEntities(event.price_info)} /> : null}
           </dl>
-
-          {hasCoords ? (
-            <div className="mt-4 flex h-40 items-center justify-center border border-line text-xs text-ink-muted">지도</div>
-          ) : null}
 
           <div className="mt-6 flex flex-wrap gap-3">
             {event.source_url ? (
@@ -84,7 +81,7 @@ export default async function EventDetailPage({ params }: { params: Promise<{ id
   );
 }
 
-function Row({ k, v, pre }: { k: string; v: string; pre?: boolean }) {
+function Row({ k, v, pre }: { k: string; v: ReactNode; pre?: boolean }) {
   return (
     <div className="flex gap-6 border-b border-line py-4">
       <dt className="w-16 shrink-0 pt-0.5 text-xs font-bold uppercase tracking-wide text-ink-muted">{k}</dt>
